@@ -28,8 +28,17 @@ python3 transcription.py \
     --generator_model grad-tts-BAS
 ```
 
-
-## Metrics:
+## Metrics
 
 - Using the .csv from the transcription, we have access to the original and synthesized transcriptions along with paths for both original and synthesized speech.
 - The script generates another .csv with a set of metrics computed for each individual audio file which allows uus to compute various statistics.
+
+- Example usage for **metrics.py**:
+
+```bash
+python3 metrics.py
+    --input_filelist /home/astanea/git-repos/TTS/evaluation/matcha-tts-BAS.csv  \
+    --base_dir_synthesized /home/astanea/git-repos/TTS/Matcha-TTS/synth_output/bas/ \
+    --base_dir_original /datasets/SWARA/SWARA1.0_22k_noSil \
+    --output_csv ./results/metrics_grad-tts-BAS.csv
+```
