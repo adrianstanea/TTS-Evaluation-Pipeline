@@ -17,7 +17,7 @@ from pathlib import Path
 
 from utils import parse_filelist
 
-SAVE_DIR = "results"
+SAVE_DIR = "redo_squim"
 objective_model = SQUIM_OBJECTIVE.get_model()
 subjective_model = SQUIM_SUBJECTIVE.get_model()
 
@@ -152,16 +152,12 @@ if __name__ == "__main__":
     desc = df.describe()
     print(desc)
 
-    if args.report_file is None:
-        print("Report file not specified. Exiting.")
-        exit(1)
-
-    with open(args.report_file, "w") as report_file:
+    with open(os.path.join(SAVE_DIR, args.report_file), "w") as report_file:
         report_file.write(str(desc) + "\n\n\n")
 
-        report_file.write(f"PESQ: {desc['PESQ']['mean']:.3f} $\pm$ {desc['PESQ']['std']:.3f}\n")
-        report_file.write(f"STOI: {desc['STOI']['mean']:.3f} $\pm$ {desc['STOI']['std']:.3f}\n")
-        report_file.write(f"SI-SDR: {desc['SI-SDR']['mean']:.3f} $\pm$ {desc['SI-SDR']['std']:.3f}\n")
+        report_file.write(f"PESQ: {desc['PESQ']['mean']:.3f} ± {desc['PESQ']['std']:.3f}\n")
+        report_file.write(f"STOI: {desc['STOI']['mean']:.3f} ± {desc['STOI']['std']:.3f}\n")
+        report_file.write(f"SI-SDR: {desc['SI-SDR']['mean']:.3f} ± {desc['SI-SDR']['std']:.3f}\n")
 
 
 # sample = Path('/workspace/local/samples/matcha-tts-bas950-100.ckpt/bas_rnd2_460.wav')
