@@ -35,14 +35,7 @@ def save_to_csv(data, header, output_csv):
         writer.writerow(data)
 
 
-# Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.FileHandler("transcription.log"), logging.StreamHandler()],
-)
 
-logger = logging.getLogger(__name__)
 
 
 def parse_args():
@@ -50,32 +43,47 @@ def parse_args():
     parser.add_argument(
         "--input_filelist",
         type=str,
-        required=True,
+        # required=True,
         help="Filelist containing the original audio files and their transcriptions. ",
     )
     parser.add_argument(
         "--base_dir_synthesized",
         type=str,
-        required=True,
+        # required=True,
         help="Base directory of the synthesized audio files. Audio files use the same name as the original audio files.",
     )
     parser.add_argument(
         "--base_dir_original",
         type=str,
-        required=True,
+        # required=True,
         help="Base directory of the original audio files. Audio files use the same name as the original audio files.",
     )
     parser.add_argument(
         "--output_csv",
         type=str,
-        required=True,
+        # required=True,
         help="Path to the generator model.",
+    )
+    parser.add_argument(
+        "--report_file",
+        type=str,
+        # required=True,
+        help="Synthesized statistics report file.",
     )
     args = parser.parse_args()
     return args
 
 
 def main(args=None):
+    # Set up logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[logging.FileHandler("transcription.log"), logging.StreamHandler()],
+    )
+
+    logger = logging.getLogger(__name__)
+
     filelist = parse_filelist(args.input_filelist, split_char="|")
 
     os.makedirs(SAVE_DIR, exist_ok=True)
@@ -109,7 +117,7 @@ def main(args=None):
     logger.debug(f"Results list: {results_list}")
 
     for idx, line in enumerate(tqdm(filelist, desc="Processing files")):
-        # Skip header
+        # # Skip header
         if idx == 0:
             continue
 
@@ -158,10 +166,34 @@ def main(args=None):
 if __name__ == "__main__":
     args = parse_args()
 
-    # main(args)
+    main(args)
 
-    df = pd.read_csv(args.output_csv, delimiter="|", header=0)
-    # df = pd.read_csv(os.path.join(SAVE_DIR, args.output_csv), delimiter="|", header=0)
+    # df = pd.read_csv(args.output_csv, delimiter="|", header=0)
 
-    print(df.head())
-    print(df.describe())
+    df = pd.read_csv(os.path.join(SAVE_DIR, args.output_csv), delimiter="|", header=0)
+
+    desc = df.describe()
+    print(desc)
+
+    print(f"CER: {desc['CER']['mean']:.3f} $\pm$ {desc['CER']['std']:.3f}")
+    print(f"WER: {desc['WER']['mean']:.3f} $\pm$ {desc['WER']['std']:.3f}")
+    print(f"UTMOS Original: {desc['UTMOS_Original']['mean']:.3f} $\pm$ {desc['UTMOS_Original']['std']:.3f}")
+    print(f"UTMOS Synthesized: {desc['UTMOS_Synthesized']['mean']:.3f} $\pm$ {desc['UTMOS_Synthesized']['std']:.3f}")
+    print(f"Log F0 RMSE: {desc['Log_F0_RMSE']['mean']:.3f} $\pm$ {desc['Log_F0_RMSE']['std']:.3f}")
+    print(f"MCD: {desc['MCD']['mean']:.3f} $\pm$ {desc['MCD']['std']:.3f}")
+    print(f"Speaker Cosine Similarity: {desc['Speaker_Cosine_Similarity']['mean']:.3f} $\pm$ {desc['Speaker_Cosine_Similarity']['std']:.3f}")
+
+    if args.report_file is None:
+        print("Report file not specified. Exiting.")
+        exit(1)
+
+    with open(args.report_file, "w") as report_file:
+        report_file.write(str(desc) + "\n\n\n")
+
+        report_file.write(f"CER: {desc['CER']['mean']:.3f} ± {desc['CER']['std']:.3f}\n")
+        report_file.write(f"WER: {desc['WER']['mean']:.3f} ± {desc['WER']['std']:.3f}\n")
+        report_file.write(f"UTMOS Original: {desc['UTMOS_Original']['mean']:.3f} ± {desc['UTMOS_Original']['std']:.3f}\n")
+        report_file.write(f"UTMOS Synthesized: {desc['UTMOS_Synthesized']['mean']:.3f} ± {desc['UTMOS_Synthesized']['std']:.3f}\n")
+        report_file.write(f"Log F0 RMSE: {desc['Log_F0_RMSE']['mean']:.3f} ± {desc['Log_F0_RMSE']['std']:.3f}\n")
+        report_file.write(f"MCD: {desc['MCD']['mean']:.3f} ± {desc['MCD']['std']:.3f}\n")
+        report_file.write(f"Speaker Cosine Similarity: {desc['Speaker_Cosine_Similarity']['mean']:.3f} ± {desc['Speaker_Cosine_Similarity']['std']:.3f}\n")

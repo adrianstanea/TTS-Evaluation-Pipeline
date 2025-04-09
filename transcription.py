@@ -74,17 +74,14 @@ def main():
 
     filelist = parse_filelist(args.input_filelist, split_char="|")
     for idx, line in enumerate(tqdm(filelist, desc="Processing files")):
-        if idx < 352:
-            continue
-
-        filepath, _, _ = line[0], line[1], line[2]
+        filepath, trascription_original, _ = line[0], line[1], line[2]
 
         audio_file = os.path.basename(filepath)
 
-        original_audio_file = filepath
+        # original_audio_file = filepath
         synthesized_audio_file = os.path.join(args.base_dir_synthesized, audio_file)
 
-        trascription_original = transcribe_audio(original_audio_file)
+        # trascription_original = transcribe_audio(original_audio_file)
         transcription_synthesized = transcribe_audio(synthesized_audio_file)
 
         save_transcriptions_to_csv(

@@ -9,7 +9,9 @@ from discrete_speech_metrics import PESQ, UTMOS, LogF0RMSE
 from pydub import AudioSegment, effects
 from resemblyzer import VoiceEncoder, preprocess_wav
 
-from DiscreteSpeechMetrics.discrete_speech_metrics.mcd import MCD
+from discrete_speech_metrics.mcd import MCD
+from num2words import num2words
+
 
 SR = 16_000
 
@@ -33,8 +35,18 @@ encoder = VoiceEncoder()
 def normalize_text(text: str) -> str:
     chars_to_ignore_regex = '[,?.!\-\;\:"“%‘”�—’…–„]'
 
+    # Special case: % -> "procente"
+    text = text.replace("%", " procente")
+
     # Lowercase text and remove special characters
     text = re.sub(chars_to_ignore_regex, "", text.lower())
+
+    # Replace digits with words
+    def replace_digits_with_words(match):
+        number = int(match.group())
+        return num2words(number, lang='ro')
+
+    text = re.sub(r"\b\d+\b", replace_digits_with_words, text)
 
     # In addition, we can normalize the target text, e.g. removing new lines characters etc...
     token_sequences_to_ignore = ["\n\n", "\n", "   ", "  "]
